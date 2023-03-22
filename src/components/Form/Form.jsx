@@ -50,7 +50,11 @@ class Form extends React.Component {
               name="name"
               pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
               title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+<<<<<<< HEAD
               placeholder="Andrey Andrey "
+=======
+              placeholder="Andrey Andrey"
+>>>>>>> ec06018b1f91a31b6ac04616ca0eab9c102d73b8
               required
             />
           </label>
