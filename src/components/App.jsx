@@ -1,76 +1,65 @@
-import React from 'react';
-import Form from './Form/Form';
-import Filter from './Filter/Filter';
-import ContactsList from './ContactsList/ContactsList';
+import React, { Component } from 'react';
+import { Form } from './Form';
+import ContactsList from './Contacts';
+import Filter from './Filter';
+import { nanoid } from 'nanoid';
+import { Wrapper } from './Contacts.styled';
 
-export class App extends React.Component {
+export class App extends Component {
   state = {
     contacts: [],
     filter: '',
   };
 
-  formSubmitHandler = data => {
-    const matchNameInput = this.state.contacts.find(
-      contact => contact.name.toLowerCase() === data.name.toLowerCase()
-    );
+  addContact = contact => {
+    contact.id = nanoid();
+    const normalizedName = contact.name.toLowerCase();
 
-    if (matchNameInput) {
-      alert(data.name + ' is already in contacts.');
-    } else {
-      this.setState(prev => ({ contacts: [...prev.contacts, data] }));
-      this.localStorageSaveContacts();
-    }
-  };
-
-  handleDataUpdate = input => {
-    this.setState({ filter: input });
-  };
-
-  filterContacts() {
-    return this.state.filter !== ''
-      ? this.state.contacts.filter(contact =>
-        contact.name
-          .toLowerCase()
-          .includes(this.state.filter.toLowerCase().trim())
+    if (
+      this.state.contacts.find(
+        contact => contact.name.toLowerCase() === normalizedName
       )
-      : this.state.contacts;
-  }
+    ) {
+      return alert(`${contact.name} is already in contacts!`);
+    }
 
-  onDeleteBtn = onDeleteBtn => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(
-        contact => contact.id !== onDeleteBtn
-      ),
+    this.setState(({ contacts }) => ({
+      contacts: [contact, ...contacts],
     }));
-    this.localStorageSaveContacts()
   };
 
-  localStorageSaveContacts() {
-    setTimeout(() => {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }, 200);
-  }
-  componentDidMount() {
-    const getLocalStorageContacts = JSON.parse(
-      localStorage.getItem('contacts')
+  deleteContact = contactId => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
+    }));
+  };
+
+  changeFilter = e => {
+    this.setState({ filter: e.currentTarget.value });
+  };
+
+  getVisibleContacts = () => {
+    const { filter, contacts } = this.state;
+    const normalizedFilter = filter.toLowerCase();
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(normalizedFilter)
     );
-    if (getLocalStorageContacts !== null) {
-      this.setState({ contacts: getLocalStorageContacts });
-    }
-  }
+  };
 
   render() {
+    const { filter } = this.state;
+    const visibleContacts = this.getVisibleContacts();
     return (
-      <>
-        <Form clickSubmit={this.formSubmitHandler} />
-
-        <Filter onDataUpdate={this.handleDataUpdate} />
-
+      <Wrapper>
+        <h1>Phonebook</h1>
+        <Form onSubmit={this.addContact} />
+        <h2>Contacts</h2>
+        <Filter value={filter} onChange={this.changeFilter} />
         <ContactsList
-          arrContacts={this.filterContacts()}
-          onDeleteBtn={this.onDeleteBtn}
+          contacts={visibleContacts}
+          onDeleteContact={this.deleteContact}
         />
-      </>
+      </Wrapper>
     );
   }
 }
